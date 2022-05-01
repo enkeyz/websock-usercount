@@ -7,7 +7,10 @@
     <title>UserCount Service</title>
 </head>
 <body>
+    <p id="active-users">0</p>
+
 <script type="application/javascript">
+    const activeUsers = document.getElementById('active-users')
 
     if (window.WebSocket) {
         const conn = new WebSocket('ws://127.0.0.1:7777/usercount')
@@ -17,7 +20,11 @@
         }
 
         conn.onerror = function(event) {
-            console.log("error: ", conn)
+            console.log("error: ", event)
+        }
+
+        conn.onmessage = function(even) {
+            console.log("message: ", event.data)
         }
     }
 </script>

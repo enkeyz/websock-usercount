@@ -24,8 +24,8 @@ func NewUserCountServer() *UserCountServer {
 
 func (u *UserCountServer) userCountHandler(w http.ResponseWriter, r *http.Request) {
 	upgrader := websocket.Upgrader{
-		ReadBufferSize:  2048,
-		WriteBufferSize: 4096,
+		ReadBufferSize:  1024,
+		WriteBufferSize: 2048,
 	}
 	// TODO never do this
 	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
