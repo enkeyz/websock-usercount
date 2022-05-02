@@ -22,7 +22,10 @@ func NewClient(connection *websocket.Conn, hub *Hub) *Client {
 }
 
 func (c *Client) Listen() {
-	defer c.conn.Close()
+	defer func() {
+		c.hub.leave <- c
+		c.conn.Close()
+	}()
 
 	for msg := range c.send {
 		err := c.conn.WriteMessage(websocket.TextMessage, []byte(strconv.Itoa(msg)))

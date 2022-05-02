@@ -23,7 +23,7 @@
             console.log("error: ", event)
         }
 
-        conn.onmessage = function(even) {
+        conn.onmessage = function(event) {
             console.log("message: ", event.data)
             activeUsers.textContent = event.data
         }
