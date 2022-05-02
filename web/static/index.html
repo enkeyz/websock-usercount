@@ -25,6 +25,7 @@
 
         conn.onmessage = function(even) {
             console.log("message: ", event.data)
+            activeUsers.textContent = event.data
         }
     }
 </script>

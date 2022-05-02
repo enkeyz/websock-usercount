@@ -42,5 +42,7 @@ func (u *UserCountServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Printf("Successfull websocket connection from %q", conn.RemoteAddr().String())
 
-	u.hub.Join(NewClient(conn))
+	client := NewClient(conn, u.hub)
+	u.hub.join <- client
+	go client.Listen()
 }

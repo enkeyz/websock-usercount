@@ -1,50 +1,46 @@
 package ws
 
 import (
-	"sync"
 	"time"
 )
 
 const tickerDuration = 1 * time.Second
 
 type Hub struct {
-	mu          sync.Mutex
-	connections map[*Client]bool
-	ticker      *time.Ticker
+	clients map[*Client]bool
+	ticker  *time.Ticker
+	join    chan *Client
+	leave   chan *Client
 }
 
 func NewHub() *Hub {
 	return &Hub{
-		mu:          sync.Mutex{},
-		connections: make(map[*Client]bool),
-		ticker:      time.NewTicker(tickerDuration),
+		clients: make(map[*Client]bool),
+		ticker:  time.NewTicker(tickerDuration),
+		join:    make(chan *Client),
+		leave:   make(chan *Client),
 	}
 }
 
-func (h *Hub) Join(client *Client) {
-	h.mu.Lock()
-	defer h.mu.Unlock()
-	h.connections[client] = true
-}
-
-func (h *Hub) Leave(client *Client) {
-	h.mu.Lock()
-	defer h.mu.Unlock()
-	delete(h.connections, client)
-}
-
-func (h *Hub) ActiveConnections() int {
-	h.mu.Lock()
-	defer h.mu.Unlock()
-	return len(h.connections)
+func (h *Hub) activeConnections() int {
+	return len(h.clients)
 }
 
 func (h *Hub) Run() {
 	for {
 		select {
+		case client := <-h.join:
+			h.clients[client] = true
+		case client := <-h.leave:
+			delete(h.clients, client)
 		case <-h.ticker.C:
-			for client := range h.connections {
-				client.Send(h.ActiveConnections())
+			for client := range h.clients {
+				select {
+				case client.send <- h.activeConnections():
+				default:
+					close(client.send)
+					delete(h.clients, client)
+				}
 			}
 		}
 	}
