@@ -10,14 +10,14 @@ const tickerDuration = 1 * time.Second
 type Hub struct {
 	mu          sync.Mutex
 	connections map[*Client]bool
-	ticker      time.Ticker
+	ticker      *time.Ticker
 }
 
 func NewHub() *Hub {
 	return &Hub{
 		mu:          sync.Mutex{},
 		connections: make(map[*Client]bool),
-		ticker:      *time.NewTicker(tickerDuration),
+		ticker:      time.NewTicker(tickerDuration),
 	}
 }
 
