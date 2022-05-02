@@ -1,10 +1,11 @@
 package ws
 
 import (
+	"log"
 	"time"
 )
 
-const tickerDuration = 1 * time.Second
+const tickerDuration = 3 * time.Second
 
 type Hub struct {
 	clients map[*Client]bool
@@ -31,9 +32,16 @@ func (h *Hub) Run() {
 		select {
 		case client := <-h.join:
 			h.clients[client] = true
+			log.Printf("Successfull websocket connection from %s", client.remoteAddr)
 		case client := <-h.leave:
+			log.Printf("Closing websocket connection on %s", client.remoteAddr)
 			delete(h.clients, client)
 		case <-h.ticker.C:
+			if h.activeConnections() == 0 {
+				continue
+			}
+
+			log.Printf("Broadcasting message to %d clients", h.activeConnections())
 			for client := range h.clients {
 				select {
 				case client.send <- h.activeConnections():

@@ -1,23 +1,24 @@
 package ws
 
 import (
-	"log"
 	"strconv"
 
 	"github.com/gorilla/websocket"
 )
 
 type Client struct {
-	hub  *Hub
-	conn *websocket.Conn
-	send chan int
+	hub        *Hub
+	conn       *websocket.Conn
+	remoteAddr string
+	send       chan int
 }
 
 func NewClient(connection *websocket.Conn, hub *Hub) *Client {
 	return &Client{
-		hub:  hub,
-		conn: connection,
-		send: make(chan int),
+		hub:        hub,
+		conn:       connection,
+		remoteAddr: connection.RemoteAddr().String(),
+		send:       make(chan int),
 	}
 }
 
@@ -32,6 +33,5 @@ func (c *Client) Listen() {
 		if err != nil {
 			return
 		}
-		log.Printf("Broadcasting message to %v", c.conn.RemoteAddr().String())
 	}
 }

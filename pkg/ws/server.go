@@ -40,7 +40,6 @@ func (u *UserCountServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 		log.Printf("error when upgrading connection %v", err)
 		return
 	}
-	log.Printf("Successfull websocket connection from %q", conn.RemoteAddr().String())
 
 	client := NewClient(conn, u.hub)
 	u.hub.join <- client
