@@ -1,4 +1,4 @@
-package usercountserv
+package ws
 
 import (
 	"log"
@@ -9,26 +9,31 @@ import (
 
 type UserCountServer struct {
 	http.Handler
+	hub *Hub
 }
 
-func NewUserCountServer() *UserCountServer {
+func NewUserCountServer(hub *Hub) *UserCountServer {
 	ucs := &UserCountServer{}
 
+	ucs.hub = hub
+
 	router := http.NewServeMux()
-	router.Handle("/usercount", http.HandlerFunc(ucs.userCountHandler))
+	router.Handle("/usercount", http.HandlerFunc(ucs.wsHandler))
 
 	ucs.Handler = router
 
 	return ucs
 }
 
-func (u *UserCountServer) userCountHandler(w http.ResponseWriter, r *http.Request) {
+func (u *UserCountServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 	upgrader := websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 2048,
 	}
-	// TODO never do this
-	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
+
+	upgrader.CheckOrigin = func(r *http.Request) bool {
+		return true
+	}
 
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -36,4 +41,6 @@ func (u *UserCountServer) userCountHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 	log.Printf("Successfull websocket connection from %q", conn.RemoteAddr().String())
+
+	u.hub.Join(&Client{})
 }

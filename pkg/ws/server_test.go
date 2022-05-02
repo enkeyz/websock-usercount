@@ -1,4 +1,4 @@
-package usercountserv
+package ws
 
 import (
 	"net/http/httptest"
@@ -8,8 +8,9 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-func TestConnectionCount(t *testing.T) {
-	uServer := NewUserCountServer()
+func TestGetConnectionCount(t *testing.T) {
+	hub := NewHub()
+	uServer := NewUserCountServer(hub)
 	server := httptest.NewServer(uServer)
 	t.Cleanup(server.Close)
 	wsUrl := "ws" + strings.TrimPrefix(server.URL, "http") + "/usercount"
